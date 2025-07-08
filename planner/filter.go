@@ -1,22 +1,22 @@
 package planner
 
 import (
-	"github.com/zhengpeijun/miris-master/filter"
-	"github.com/zhengpeijun/miris-master/miris"
+	"../filter"
+	"../wukong"
 
 	"log"
 	"sort"
 )
 
-func PlanFilter(context plannerContext) miris.FilterPlan {
+func PlanFilter(context plannerContext) wukong.FilterPlan {
 	trainLabels := make([]bool, len(context.trainTracks))
 	for i, track := range context.trainTracks {
-		trainLabels[i] = context.predFunc([][]miris.Detection{track})
+		trainLabels[i] = context.predFunc([][]wukong.Detection{track})
 	}
 	valLabels := make([]bool, len(context.valTracks))
 	var valTrue, valFalse int
 	for i, track := range context.valTracks {
-		valLabels[i] = context.predFunc([][]miris.Detection{track})
+		valLabels[i] = context.predFunc([][]wukong.Detection{track})
 		if valLabels[i] {
 			valTrue++
 		} else {
@@ -29,7 +29,7 @@ func PlanFilter(context plannerContext) miris.FilterPlan {
 	coarsePerTrueTrack := 1 + (50000 / valTrue)
 	coarsePerFalseTrack := 1 + (50000 / valFalse)
 	log.Printf("[plan-filter] compute coarse tracks (max true=%d false=%d per track with %d val tracks)", coarsePerTrueTrack, coarsePerFalseTrack, len(context.valTracks))
-	var coarseTracks [][]miris.Detection
+	var coarseTracks [][]wukong.Detection
 	var coarseLabels []bool
 	for i, track := range context.valTracks {
 		var n int
@@ -38,7 +38,7 @@ func PlanFilter(context plannerContext) miris.FilterPlan {
 		} else {
 			n = coarsePerFalseTrack
 		}
-		for j, coarse := range miris.GetAllCoarse(track, context.freq) {
+		for j, coarse := range wukong.GetAllCoarse(track, context.freq) {
 			coarseTracks = append(coarseTracks, coarse)
 			coarseLabels = append(coarseLabels, valLabels[i])
 			if j >= n {
@@ -69,13 +69,13 @@ func PlanFilter(context plannerContext) miris.FilterPlan {
 		}
 	}
 	log.Printf("[plan-filter] best filter is %s with precision=%v, threshold=%v", bestName, bestPrecision, bestThreshold)
-	return miris.FilterPlan{
+	return wukong.FilterPlan{
 		Name:      bestName,
 		Threshold: bestThreshold,
 	}
 }
 
-func GetPrecisionAndThreshold(curFilter filter.Filter, tracks [][]miris.Detection, labels []bool, bound float64) (float64, float64) {
+func GetPrecisionAndThreshold(curFilter filter.Filter, tracks [][]wukong.Detection, labels []bool, bound float64) (float64, float64) {
 	scores := curFilter.Predict(tracks)
 	var trueScores, falseScores []float64
 	for i := range tracks {

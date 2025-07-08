@@ -1,20 +1,20 @@
 package refine
 
 import (
-	"github.com/zhengpeijun/miris-master/miris"
-	"github.com/zhengpeijun/miris-master/predicate"
+	"../wukong"
+	"../predicate"
 
 	"log"
 )
 
-type RefinerFunc func(freq int, trainTracks [][]miris.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner
+type RefinerFunc func(freq int, trainTracks [][]wukong.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner
 
 type Refiner interface {
-	Plan(valTracks [][]miris.Detection, bounds float64) map[string]string
+	Plan(valTracks [][]wukong.Detection, bounds float64) map[string]string
 
 	// returns list of frame indexes that need to be checked
 	// and list of tracks that may need to be further refined
-	Step(tracks [][]miris.Detection, seen []int) (needed []int, refined []int)
+	Step(tracks [][]wukong.Detection, seen []int) (needed []int, refined []int)
 	Close()
 
 	// 新增的方法，用于动态调整参数
@@ -25,7 +25,7 @@ var PSRefiners = make(map[string]RefinerFunc)
 var InterpRefiners = make(map[string]RefinerFunc)
 
 // Incorporate detections (that are labeled with track IDs) into tracks.
-func incorporate(tracks map[int][]miris.Detection, detections []miris.Detection) {
+func incorporate(tracks map[int][]wukong.Detection, detections []wukong.Detection) {
 	for _, detection := range detections {
 		trackID := detection.TrackID
 		track := tracks[trackID]
@@ -35,7 +35,7 @@ func incorporate(tracks map[int][]miris.Detection, detections []miris.Detection)
 				insertIdx = i + 1
 			}
 		}
-		var newTrack []miris.Detection
+		var newTrack []wukong.Detection
 		newTrack = append(newTrack, track[0:insertIdx]...)
 		newTrack = append(newTrack, detection)
 		newTrack = append(newTrack, track[insertIdx:]...)
@@ -45,7 +45,7 @@ func incorporate(tracks map[int][]miris.Detection, detections []miris.Detection)
 
 // Runs refiners, given underlying detections that are labeled with track IDs.
 // Returns list of frames examined, and the refined tracks.
-func RunFake(refiners []Refiner, tracks [][]miris.Detection, detections [][]miris.Detection) ([]int, [][]miris.Detection) {
+func RunFake(refiners []Refiner, tracks [][]wukong.Detection, detections [][]wukong.Detection) ([]int, [][]wukong.Detection) {
 	seen := make(map[int]bool)
 	for _, track := range tracks {
 		for _, detection := range track {
@@ -61,7 +61,7 @@ func RunFake(refiners []Refiner, tracks [][]miris.Detection, detections [][]miri
 		return seenList
 	}
 
-	trackByID := make(map[int][]miris.Detection)
+	trackByID := make(map[int][]wukong.Detection)
 	for _, track := range tracks {
 		trackByID[track[0].TrackID] = track
 	}
@@ -72,7 +72,7 @@ func RunFake(refiners []Refiner, tracks [][]miris.Detection, detections [][]miri
 			pending = append(pending, trackID)
 		}
 		for len(pending) > 0 {
-			inTracks := make([][]miris.Detection, len(pending))
+			inTracks := make([][]wukong.Detection, len(pending))
 			for i, trackID := range pending {
 				inTracks[i] = trackByID[trackID]
 			}
@@ -101,7 +101,7 @@ func RunFake(refiners []Refiner, tracks [][]miris.Detection, detections [][]miri
 		}
 	}
 
-	var outTracks [][]miris.Detection
+	var outTracks [][]wukong.Detection
 	for _, track := range trackByID {
 		outTracks = append(outTracks, track)
 	}

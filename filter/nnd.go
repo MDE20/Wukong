@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"github.com/zhengpeijun/miris-master/miris"
+	"../wukong"
 
 	"log"
 )
@@ -11,11 +11,11 @@ func init() {
 }
 
 type NNDFilter struct {
-	tracks [][]miris.Detection
+	tracks [][]wukong.Detection
 }
 
-func MakeNNDFilter(freq int, tracks [][]miris.Detection, labels []bool, cfg map[string]string) Filter {
-	var trueTracks [][]miris.Detection
+func MakeNNDFilter(freq int, tracks [][]wukong.Detection, labels []bool, cfg map[string]string) Filter {
+	var trueTracks [][]wukong.Detection
 	for i, track := range tracks {
 		if labels[i] && len(track) >= 2 {
 			trueTracks = append(trueTracks, track)
@@ -24,7 +24,7 @@ func MakeNNDFilter(freq int, tracks [][]miris.Detection, labels []bool, cfg map[
 	return NNDFilter{trueTracks}
 }
 
-func (nnd NNDFilter) Predict(tracks [][]miris.Detection) []float64 {
+func (nnd NNDFilter) Predict(tracks [][]wukong.Detection) []float64 {
 	ch := make(chan int)
 	donech := make(chan map[int]float64)
 	for i := 0; i < Threads; i++ {
@@ -38,7 +38,7 @@ func (nnd NNDFilter) Predict(tracks [][]miris.Detection) []float64 {
 				}
 				var bestDistance float64 = -1
 				for _, track2 := range nnd.tracks {
-					d := miris.TrackDistance(track, track2)
+					d := wukong.TrackDistance(track, track2)
 					if bestDistance == -1 || d < bestDistance {
 						bestDistance = d
 					}

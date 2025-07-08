@@ -1,14 +1,14 @@
 package planner
 
 import (
-	"github.com/zhengpeijun/miris-master/filter"
-	"github.com/zhengpeijun/miris-master/miris"
-	"github.com/zhengpeijun/miris-master/refine"
+	"../filter"
+	"../wukong"
+	"../refine"
 
 	"log"
 )
 
-func PlanRefine(context plannerContext, filterPlan miris.FilterPlan) miris.RefinePlan {
+func PlanRefine(context plannerContext, filterPlan wukong.FilterPlan) wukong.RefinePlan {
 	psRefiners := make(map[string]refine.Refiner)
 	interpRefiners := make(map[string]refine.Refiner)
 	refinerConfigs := make(map[string]map[string]string)
@@ -35,19 +35,19 @@ func PlanRefine(context plannerContext, filterPlan miris.FilterPlan) miris.Refin
 	// refining the val tracks after filtering
 	trainLabels := make([]bool, len(context.trainTracks))
 	for i, track := range context.trainTracks {
-		trainLabels[i] = context.predFunc([][]miris.Detection{track})
+		trainLabels[i] = context.predFunc([][]wukong.Detection{track})
 	}
 	selFilter := filter.FilterMap[filterPlan.Name](context.freq, context.trainTracks, trainLabels, context.modelCfg.GetFilterCfg(filterPlan.Name, context.freq))
-	coarseTracks := make([][]miris.Detection, len(context.valTracks))
+	coarseTracks := make([][]wukong.Detection, len(context.valTracks))
 	for i, track := range context.valTracks {
-		coarseTracks[i] = miris.GetCoarse(track, context.freq, 0)
+		coarseTracks[i] = wukong.GetCoarse(track, context.freq, 0)
 	}
 	scores := selFilter.Predict(coarseTracks)
 	selFilter.Close()
-	var filteredTracks [][]miris.Detection
+	var filteredTracks [][]wukong.Detection
 	var origSatisfy, filterSatisfy int
 	for i, track := range context.valTracks {
-		satisfy := context.predFunc([][]miris.Detection{track})
+		satisfy := context.predFunc([][]wukong.Detection{track})
 		if satisfy {
 			origSatisfy++
 		}
@@ -76,7 +76,7 @@ func PlanRefine(context plannerContext, filterPlan miris.FilterPlan) miris.Refin
 		}
 	}
 	log.Printf("[plan-refine] decided to use (%s, %s)", bestNames[0], bestNames[1])
-	return miris.RefinePlan{
+	return wukong.RefinePlan{
 		PSMethod:     bestNames[0],
 		PSCfg:        refinerConfigs[bestNames[0]],
 		InterpMethod: bestNames[1],

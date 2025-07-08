@@ -1,7 +1,7 @@
 package gnn
 
 import (
-	"github.com/zhengpeijun/miris-master/miris"
+	"../wukong"
 
 	"fmt"
 	"sort"
@@ -31,6 +31,7 @@ func GetEdgeMaps(edges []Edge) (map[[2]int][]Edge, map[[2]int][]Edge) {
 
 // Update an existing edge set at the specified frames.
 // It is expected that the existing edges are captured at a higher (less accurate) freq.
+// 根据某些输入帧的推理结果，更新图中的边
 func (gnn *GNN) Update(edges []Edge, frames [][2]int, q map[int]float64) []Edge {
 	leftMap, rightMap := GetEdgeMaps(edges)
 	edgeSet := make(map[Edge]bool)
@@ -56,6 +57,10 @@ func (gnn *GNN) Update(edges []Edge, frames [][2]int, q map[int]float64) []Edge 
 		idx2 := idx1 + freq
 		mat := mats[i]
 		// 检查 q[freq] 是否存在，若不存在则设置默认值
+		if _, exists := q[freq]; !exists {
+			q[freq] = 1.0 // 或者其他默认值
+		}
+
 		if q[freq] == 0 {
 			panic(fmt.Errorf("gnn update got freq %d without q on frames (%d,%d)", freq, idx1, idx2))
 		}
@@ -71,12 +76,12 @@ func (gnn *GNN) Update(edges []Edge, frames [][2]int, q map[int]float64) []Edge 
 				var maxProb float64 = 0
 				for j := range mat[i] {
 					if mat[i][j] > maxProb {
-						maxProb = mat[i][j]
+						maxProb = mat[i][j] // 找到最大概率
 					}
 				}
 				for j := range mat[i] {
 					if mat[i][j] < q[freq]*maxProb {
-						continue
+						continue // 过滤低于阈值的概率
 					}
 					var edge Edge
 					if j == termIdx {
@@ -194,7 +199,7 @@ func (gnn *GNN) GetComponents(edges []Edge) [][]Edge {
 // Given a concrete component (no ambiguous edges), returns the corresponding
 // track. If not concrete, this returns arbitrary track represented by the
 // component.
-func (gnn *GNN) ComponentToTrack(comp []Edge) []miris.Detection {
+func (gnn *GNN) ComponentToTrack(comp []Edge) []wukong.Detection {
 	smallestEdge := comp[0]
 	for _, edge := range comp {
 		if edge.LeftFrame < smallestEdge.LeftFrame {
@@ -202,7 +207,7 @@ func (gnn *GNN) ComponentToTrack(comp []Edge) []miris.Detection {
 		}
 	}
 	leftMap, _ := GetEdgeMaps(comp)
-	track := []miris.Detection{gnn.detections[smallestEdge.LeftFrame][smallestEdge.LeftIdx]}
+	track := []wukong.Detection{gnn.detections[smallestEdge.LeftFrame][smallestEdge.LeftIdx]}
 	last := [2]int{smallestEdge.LeftFrame, smallestEdge.LeftIdx}
 	for len(leftMap[last]) > 0 {
 		edge := leftMap[last][0]
@@ -215,7 +220,7 @@ func (gnn *GNN) ComponentToTrack(comp []Edge) []miris.Detection {
 	return track
 }
 
-func (gnn *GNN) SampleComponent(comp []Edge) [][]miris.Detection {
+func (gnn *GNN) SampleComponent(comp []Edge) [][]wukong.Detection {
 	// right now we don't do the sampling
 	// actually we just pick the highest scoring one:
 	// (1) for each left detection, remove all but the highest outgoing edge
@@ -271,7 +276,7 @@ func (gnn *GNN) SampleComponent(comp []Edge) [][]miris.Detection {
 	for edge := range edgeSet {
 		edges = append(edges, edge)
 	}
-	var tracks [][]miris.Detection
+	var tracks [][]wukong.Detection
 	for _, subcomp := range gnn.GetComponents(edges) {
 		tracks = append(tracks, gnn.ComponentToTrack(subcomp))
 	}
@@ -331,4 +336,141 @@ func (gnn *GNN) GetUncertainFrames(components [][]Edge, seen []int) []int {
 	}
 	sort.Ints(frames)
 	return frames
+}
+
+// UpdateEdge 根据输入的边集和帧数据更新GNN图结构中的边。
+// edges: 当前边的集合。
+// frames: 包含帧索引和频率的数组，每个元素代表要处理的一对帧及其频率。
+// q: 用于过滤边的概率阈值。
+func (gnn *GNN) UpdateEdges(edges []Edge, frames [][2]int, q map[int]float64) []Edge {
+	// 构建边的索引映射，以便快速查找左侧和右侧节点的边。
+	leftMap, rightMap := GetEdgeMaps(edges)
+
+	// 创建一个边集合来存储所有当前的边。
+	edgeSet := make(map[Edge]bool)
+	for _, edge := range edges {
+		edgeSet[edge] = true
+	}
+
+	// 对帧进行排序，以确保按照时间顺序进行更新。
+	sort.Slice(frames, func(i, j int) bool {
+		return frames[i][0] < frames[j][0]
+	})
+
+	// 构造推理帧列表，以便后续批量推理。
+	frameInferList := make([][2]int, len(frames))
+	for i, frameSpec := range frames {
+		idx1 := frameSpec[0]
+		freq := frameSpec[1]
+		frameInferList[i] = [2]int{idx1, idx1 + freq}
+	}
+	// 使用GNN推理多个帧之间的边。
+	mats := gnn.InferMany(frameInferList, "[gnn-update]")
+
+	// 遍历每个帧对，更新边的信息。
+	for i, frameSpec := range frames {
+		idx1 := frameSpec[0]
+		freq := frameSpec[1]
+		idx2 := idx1 + freq
+		mat := mats[i]
+
+		// 检查并设置缺省概率阈值。
+		if _, exists := q[freq]; !exists {
+			q[freq] = 1.0
+		}
+
+		// 如果阈值为0，直接报错退出。
+		if q[freq] == 0 {
+			panic(fmt.Errorf("gnn update got freq %d without q on frames (%d,%d)", freq, idx1, idx2))
+		}
+		// 如果当前帧没有检测结果，则跳过。
+		if len(gnn.detections[idx1]) == 0 || len(gnn.detections[idx2]) == 0 {
+			continue
+		}
+		termIdx := len(gnn.detections[idx2])
+
+		// 用于存储新生成的边。
+		newEdges := make(map[[2]int][]Edge)
+
+		// 根据阈值 q 进行边的过滤与构建。
+		if q[freq] < 1 {
+			for i := range mat {
+				var maxProb float64 = 0
+				for j := range mat[i] {
+					if mat[i][j] > maxProb {
+						maxProb = mat[i][j] // 找到最大概率值。
+					}
+				}
+				for j := range mat[i] {
+					if mat[i][j] < q[freq]*maxProb {
+						continue // 过滤低于阈值的边。
+					}
+					var edge Edge
+					if j == termIdx {
+						edge = Edge{idx1, i, idx2, -1, mat[i][j]}
+					} else {
+						edge = Edge{idx1, i, idx2, j, mat[i][j]}
+					}
+					lk := [2]int{idx1, i}
+					newEdges[lk] = append(newEdges[lk], edge)
+				}
+			}
+		} else {
+			// 如果阈值为1，则选择每个检测结果的最高概率边。
+			fwProbs := make(map[int]float64)
+			fwEdges := make(map[int]int)
+			for j := 0; j < len(gnn.detections[idx2]); j++ {
+				var maxProb float64
+				var maxI int
+				for i := 0; i < len(gnn.detections[idx1]); i++ {
+					if mat[i][j] > maxProb {
+						maxProb = mat[i][j]
+						maxI = i
+					}
+				}
+				if maxProb > fwProbs[maxI] {
+					fwProbs[maxI] = maxProb
+					fwEdges[maxI] = j
+				}
+			}
+			for i := 0; i < len(gnn.detections[idx1]); i++ {
+				var edge Edge
+				if fwProbs[i] > 0 && fwProbs[i] > mat[i][termIdx] {
+					edge = Edge{idx1, i, idx2, fwEdges[i], fwProbs[i]}
+				} else {
+					edge = Edge{idx1, i, idx2, -1, mat[i][termIdx]}
+				}
+				lk := [2]int{idx1, i}
+				newEdges[lk] = append(newEdges[lk], edge)
+			}
+		}
+
+		// 将新边合并到边集合中。
+		for lk, edges := range newEdges {
+			isZero := len(edges) == 1 && edges[0].RightIdx == -1
+			if isZero && len(leftMap[lk]) == 1 && leftMap[lk][0].RightIdx != -1 {
+				continue
+			}
+			for _, old := range leftMap[lk] {
+				delete(edgeSet, old)
+			}
+			if isZero {
+				continue
+			}
+			for _, edge := range edges {
+				rk := [2]int{edge.RightFrame, edge.RightIdx}
+				for _, old := range rightMap[rk] {
+					delete(edgeSet, old)
+				}
+				edgeSet[edge] = true
+			}
+		}
+	}
+
+	// 将更新后的边集合转换为数组返回。
+	edges = nil
+	for edge := range edgeSet {
+		edges = append(edges, edge)
+	}
+	return edges
 }

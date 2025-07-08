@@ -1,9 +1,9 @@
 package planner
 
 import (
-	"github.com/zhengpeijun/miris-master/gnn"
-	"github.com/zhengpeijun/miris-master/miris"
-	"github.com/zhengpeijun/miris-master/predicate"
+	"../gnn"
+	"../wukong"
+	"../predicate"
 
 	"fmt"
 	"log"
@@ -12,19 +12,19 @@ import (
 
 const QThreads int = 8
 
-func GetQSamplesSegment(ppCfg miris.PreprocessConfig, segment miris.Segment, freq int, modelPath string, predFunc predicate.Predicate) []float64 {
+func GetQSamplesSegment(ppCfg wukong.PreprocessConfig, segment wukong.Segment, freq int, modelPath string, predFunc predicate.Predicate) []float64 {
 	log.Printf("[plan-q] begin %s @ %d", segment.FramePath, freq)
 	model := gnn.NewGNN(modelPath, segment.TrackPath, segment.FramePath, ppCfg.FrameScale)
 	defer model.Close()
-	detections := miris.ReadDetections(segment.TrackPath)
-	tracks := miris.GetTracks(detections)
+	detections := wukong.ReadDetections(segment.TrackPath)
+	tracks := wukong.GetTracks(detections)
 
 	// we will abuse the detection scores to fill in the gnn q values
 	// that say whether the detection matches to the next one (or, for last
 	// detection, to the terminal)
-	scoredTracks := make(map[int][]miris.Detection)
+	scoredTracks := make(map[int][]wukong.Detection)
 	for _, track := range tracks {
-		if !predFunc([][]miris.Detection{track}) {
+		if !predFunc([][]wukong.Detection{track}) {
 			continue
 		}
 		scoredTracks[track[0].TrackID] = track
@@ -34,7 +34,7 @@ func GetQSamplesSegment(ppCfg miris.PreprocessConfig, segment miris.Segment, fre
 	}
 
 	// return idx of detection in track with the specified frameIdx
-	findTrackIdxByFrame := func(track []miris.Detection, frameIdx int) int {
+	findTrackIdxByFrame := func(track []wukong.Detection, frameIdx int) int {
 		for i, detection := range track {
 			if detection.FrameIdx == frameIdx {
 				return i
@@ -87,13 +87,13 @@ func GetQSamplesSegment(ppCfg miris.PreprocessConfig, segment miris.Segment, fre
 
 	// disconnects is set of disconnected indices in track
 	// if i is disconnected, it means
-	getLongestSegment := func(track []miris.Detection, disconnects map[int]bool) []miris.Detection {
+	getLongestSegment := func(track []wukong.Detection, disconnects map[int]bool) []wukong.Detection {
 		discList := []int{-1, len(track) - 1}
 		for idx := range disconnects {
 			discList = append(discList, idx)
 		}
 		sort.Ints(discList)
-		var longestSegment []miris.Detection
+		var longestSegment []wukong.Detection
 		for i := 0; i < len(discList)-1; i++ {
 			segment := track[discList[i]+1 : discList[i+1]+1]
 			if len(segment) > len(longestSegment) {
@@ -126,7 +126,7 @@ func GetQSamplesSegment(ppCfg miris.PreprocessConfig, segment miris.Segment, fre
 			}
 			disconnects[bestIdx] = true
 			segment := getLongestSegment(track, disconnects)
-			if predFunc([][]miris.Detection{segment}) && len(segment) > len(track)/2 {
+			if predFunc([][]wukong.Detection{segment}) && len(segment) > len(track)/2 {
 				continue
 			}
 			// it doesn't work, roll back this last disconnect and stop
@@ -152,11 +152,11 @@ func GetQSamplesSegment(ppCfg miris.PreprocessConfig, segment miris.Segment, fre
 
 type qjob struct {
 	freq    int
-	segment miris.Segment
+	segment wukong.Segment
 }
 
 // Returns map from freq to list of MinQ samples.
-func GetQSamples(maxFreq int, ppCfg miris.PreprocessConfig, modelCfg miris.ModelConfig) map[int][]float64 {
+func GetQSamples(maxFreq int, ppCfg wukong.PreprocessConfig, modelCfg wukong.ModelConfig) map[int][]float64 {
 	predFunc := predicate.GetPredicate(ppCfg.Predicate)
 
 	jobch := make(chan qjob)

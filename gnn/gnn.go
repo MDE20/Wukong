@@ -1,7 +1,7 @@
 package gnn
 
 import (
-	"github.com/zhengpeijun/miris-master/miris"
+	"../wukong"
 
 	"bufio"
 	"encoding/json"
@@ -15,12 +15,12 @@ type GNN struct {
 	cmd        *exec.Cmd
 	stdin      io.WriteCloser
 	rd         *bufio.Reader
-	detections [][]miris.Detection
+	detections [][]wukong.Detection
 }
 
 func NewGNN(modelPath string, detectionPath string, framePath string, frameScale int) *GNN {
-	var detections [][]miris.Detection
-	miris.ReadJSON(detectionPath, &detections)
+	var detections [][]wukong.Detection
+	wukong.ReadJSON(detectionPath, &detections)
 
 	cmd := exec.Command("python", "models/gnn/wrapper.py", modelPath, detectionPath, framePath, strconv.Itoa(frameScale))
 	stdin, err := cmd.StdinPipe()
@@ -40,7 +40,7 @@ func NewGNN(modelPath string, detectionPath string, framePath string, frameScale
 		panic(err)
 	}
 
-	go miris.LogStderr("gnn", stderr)
+	go wukong.LogStderr("gnn", stderr)
 	rd := bufio.NewReader(stdout)
 	return &GNN{cmd, stdin, rd, detections}
 }
@@ -53,10 +53,14 @@ func (gnn *GNN) Infer(idx1 int, idx2 int) [][]float64 {
 	return gnn.InferMany([][2]int{{idx1, idx2}}, "")[0]
 }
 
+// frames [][2]int：输入的帧索引数组，每个元素是一个包含两个整数的元组 [start, end]，表示帧范围。
+// logPrefix string：日志前缀，用于调试和跟踪处理进度。
 func (gnn *GNN) InferMany(frames [][2]int, logPrefix string) [][][]float64 {
+	// 用于存储所有帧推理的结果，最终返回给调用者
 	var mats [][][]float64
 	for i := 0; i < len(frames); i += 16 {
 		if logPrefix != "" && i%16 == 0 {
+			log.Printf(" %d/%d", frames[i][0], frames[i][1])
 			log.Printf(logPrefix+" %d/%d (%d/%d)", frames[i][0], len(gnn.detections), i, len(frames))
 		}
 		end := i + 16

@@ -1,8 +1,8 @@
 package refine
 
 import (
-	"github.com/zhengpeijun/miris-master/miris"
-	"github.com/zhengpeijun/miris-master/predicate"
+	"../wukong"
+	"../predicate"
 
 	"fmt"
 	"sort"
@@ -10,7 +10,7 @@ import (
 )
 
 // Get coarse with all intermediate detections, just missing prefix and suffix.
-func GetCoarsePS(track []miris.Detection, freq int, k int) []miris.Detection {
+func GetCoarsePS(track []wukong.Detection, freq int, k int) []wukong.Detection {
 	start := -1
 	end := -1
 	for i, detection := range track {
@@ -34,7 +34,7 @@ type SimplePSRefiner struct {
 	freqThreshold int
 }
 
-func MakeSimplePSRefiner(freq int, trainTracks [][]miris.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner {
+func MakeSimplePSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner {
 	r := &SimplePSRefiner{
 		freq:     freq,
 		predFunc: predFunc,
@@ -53,13 +53,13 @@ func init() {
 	PSRefiners["simple"] = MakeSimplePSRefiner
 }
 
-func (r *SimplePSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[string]string {
+func (r *SimplePSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) map[string]string {
 	// for each coarse track, find the freqThreshold needed to get the predicate correct
 	// (but retain all intermediate detections in the coarse tracks)
 	// then choose a threshold based on bounds
 	var samples []int
 	for _, track := range valTracks {
-		label := r.predFunc([][]miris.Detection{track})
+		label := r.predFunc([][]wukong.Detection{track})
 		if !label {
 			// negative->positive due to coarse is unlikely
 			continue
@@ -68,7 +68,7 @@ func (r *SimplePSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map
 			freqThreshold := r.freq
 			for {
 				coarse := GetCoarsePS(track, freqThreshold, k%freqThreshold)
-				if r.predFunc([][]miris.Detection{coarse}) == label {
+				if r.predFunc([][]wukong.Detection{coarse}) == label {
 					break
 				}
 				freqThreshold /= 2
@@ -86,7 +86,7 @@ func (r *SimplePSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map
 	}
 }
 
-func (r *SimplePSRefiner) Step(tracks [][]miris.Detection, seen []int) ([]int, []int) {
+func (r *SimplePSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, []int) {
 	seenSet := make(map[int]bool)
 	for _, frameIdx := range seen {
 		seenSet[frameIdx] = true
@@ -117,7 +117,7 @@ func (r *SimplePSRefiner) Step(tracks [][]miris.Detection, seen []int) ([]int, [
 	needed := make(map[int]bool)
 	var refined []int
 	for i, track := range tracks {
-		if r.predFunc([][]miris.Detection{track}) {
+		if r.predFunc([][]wukong.Detection{track}) {
 			continue
 		}
 		prefixIdx := find(track[0].FrameIdx, -1)

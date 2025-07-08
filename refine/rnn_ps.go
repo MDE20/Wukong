@@ -1,9 +1,9 @@
 package refine
 
 import (
-	"github.com/zhengpeijun/miris-master/miris"
-	rnnlib "github.com/zhengpeijun/miris-master/models/rnn"
-	"github.com/zhengpeijun/miris-master/predicate"
+	"../wukong"
+	rnnlib "../models/rnn"
+	"../predicate"
 
 	"fmt"
 	"sort"
@@ -17,7 +17,7 @@ type RNNPSRefiner struct {
 	threshold float64
 }
 
-func MakeRNNPSRefiner(freq int, trainTracks [][]miris.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner {
+func MakeRNNPSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner {
 	model := rnnlib.MakeModel(2, modelCfg["model_path"])
 	r := &RNNPSRefiner{
 		freq:     freq,
@@ -38,18 +38,18 @@ func init() {
 	PSRefiners["rnn"] = MakeRNNPSRefiner
 }
 
-func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[string]string {
+func (r *RNNPSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) map[string]string {
 	type Example struct {
-		Coarse   []miris.Detection
-		Original map[int]miris.Detection
-		Debug    []miris.Detection
+		Coarse   []wukong.Detection
+		Original map[int]wukong.Detection
+		Debug    []wukong.Detection
 		MaxT     float64
 		PFreq    int
 		SFreq    int
 	}
 
-	removeFakes := func(coarse []miris.Detection) []miris.Detection {
-		var out []miris.Detection
+	removeFakes := func(coarse []wukong.Detection) []wukong.Detection {
+		var out []wukong.Detection
 		for _, detection := range coarse {
 			if detection.Left == 0 && detection.Top == 0 && detection.Right == 0 && detection.Bottom == 0 {
 				continue
@@ -62,18 +62,18 @@ func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[st
 	var samples []float64
 	var remaining []Example
 	for _, track := range valTracks {
-		label := r.predFunc([][]miris.Detection{track})
+		label := r.predFunc([][]wukong.Detection{track})
 		if !label {
 			// negative->positive due to coarse prefix/suffix is unlikely
 			continue
 		}
-		frameToDetection := make(map[int]miris.Detection)
+		frameToDetection := make(map[int]wukong.Detection)
 		for _, detection := range track {
 			frameToDetection[detection.FrameIdx] = detection
 		}
 		for k := 0; k < r.freq; k++ {
 			coarse := GetCoarsePS(track, r.freq, k)
-			if r.predFunc([][]miris.Detection{coarse}) == label {
+			if r.predFunc([][]wukong.Detection{coarse}) == label {
 				samples = append(samples, 1)
 				continue
 			} else if len(coarse) == 0 {
@@ -91,7 +91,7 @@ func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[st
 		}
 	}
 	for len(remaining) > 0 {
-		var tracks [][]miris.Detection
+		var tracks [][]wukong.Detection
 		for _, example := range remaining {
 			tracks = append(tracks, example.Coarse)
 		}
@@ -115,9 +115,9 @@ func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[st
 				frameIdx := withoutFakes[0].FrameIdx - example.PFreq
 				detection, ok := example.Original[frameIdx]
 				if !ok {
-					detection = miris.Detection{FrameIdx: frameIdx}
+					detection = wukong.Detection{FrameIdx: frameIdx}
 				}
-				coarse := append([]miris.Detection{detection}, example.Coarse...)
+				coarse := append([]wukong.Detection{detection}, example.Coarse...)
 				sort.Slice(coarse, func(i, j int) bool {
 					return coarse[i].FrameIdx < coarse[j].FrameIdx
 				})
@@ -130,9 +130,9 @@ func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[st
 				frameIdx := withoutFakes[len(withoutFakes)-1].FrameIdx + example.SFreq
 				detection, ok := example.Original[frameIdx]
 				if !ok {
-					detection = miris.Detection{FrameIdx: frameIdx}
+					detection = wukong.Detection{FrameIdx: frameIdx}
 				}
-				coarse := append([]miris.Detection{detection}, example.Coarse...)
+				coarse := append([]wukong.Detection{detection}, example.Coarse...)
 				sort.Slice(coarse, func(i, j int) bool {
 					return coarse[i].FrameIdx < coarse[j].FrameIdx
 				})
@@ -143,7 +143,7 @@ func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[st
 				}
 			}
 
-			if r.predFunc([][]miris.Detection{removeFakes(example.Coarse)}) {
+			if r.predFunc([][]wukong.Detection{removeFakes(example.Coarse)}) {
 				samples = append(samples, example.MaxT)
 				continue
 			} else if example.SFreq == 0 && example.PFreq == 0 {
@@ -163,7 +163,7 @@ func (r *RNNPSRefiner) Plan(valTracks [][]miris.Detection, bound float64) map[st
 	}
 }
 
-func (r *RNNPSRefiner) Step(tracks [][]miris.Detection, seen []int) ([]int, []int) {
+func (r *RNNPSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, []int) {
 	seenSet := make(map[int]bool)
 	for _, frameIdx := range seen {
 		seenSet[frameIdx] = true
@@ -178,10 +178,10 @@ func (r *RNNPSRefiner) Step(tracks [][]miris.Detection, seen []int) ([]int, []in
 		return 1
 	}
 
-	var checkTracks [][]miris.Detection
+	var checkTracks [][]wukong.Detection
 	var checkFrames [][2]int
 	for _, track := range tracks {
-		if r.predFunc([][]miris.Detection{track}) || len(track) == 0 {
+		if r.predFunc([][]wukong.Detection{track}) || len(track) == 0 {
 			continue
 		}
 
@@ -194,8 +194,8 @@ func (r *RNNPSRefiner) Step(tracks [][]miris.Detection, seen []int) ([]int, []in
 				curFrames[0] = frameIdx
 				break
 			}
-			fake := miris.Detection{FrameIdx: frameIdx}
-			track = append([]miris.Detection{fake}, track...)
+			fake := wukong.Detection{FrameIdx: frameIdx}
+			track = append([]wukong.Detection{fake}, track...)
 		}
 		sFreq := getFreq(track[len(track)-1].FrameIdx)
 		for freq := sFreq / 2; freq >= 1; freq /= 2 {
@@ -204,7 +204,7 @@ func (r *RNNPSRefiner) Step(tracks [][]miris.Detection, seen []int) ([]int, []in
 				curFrames[1] = frameIdx
 				break
 			}
-			fake := miris.Detection{FrameIdx: frameIdx}
+			fake := wukong.Detection{FrameIdx: frameIdx}
 			track = append(track, fake)
 		}
 		if curFrames[0] == -1 && curFrames[1] == -1 {
