@@ -1,0 +1,465 @@
+fps 10/16 alpha=0.9
+shibuya：
+总视频秒数：1938秒
+处理时长：3分2秒
+每秒处理视频数：10.6456
+p=1 r=0.8220 f=0.9023
+2024/07/11 14:40:18 [exec] loading train tracks
+2024/07/11 14:40:20 [exec] initializing models
+2024/07/11 14:40:21 [exec] run initial tracking
+2024/07/11 14:40:21 [gnn-update] 0/31000 (0/968)
+2024/07/11 14:40:21 [rnn-model] 
+2024/07/11 14:40:22 [rnn-model] 
+2024/07/11 14:40:23 [gnn] 
+2024/07/11 14:40:24 [gnn] initializing model
+2024/07/11 14:40:26 [gnn] loading detections from data/shibuya/json/2-detections.json
+2024/07/11 14:40:27 [gnn] finished loading
+2024/07/11 14:40:35 [gnn-update] 4096/31000 (128/968)
+2024/07/11 14:41:28 [gnn-update] 28672/31000 (896/968)
+2024/07/11 14:41:32 [gnn-update] 0/31000 (0/1937)
+2024/07/11 14:42:29 [gnn-update] 16384/31000 (1024/1937)
+2024/07/11 14:42:32 [gnn] {'read': 90.50371646881104, 'run': 33.19442391395569, 'count': 128}
+2024/07/11 14:42:36 [gnn-update] 18432/31000 (1152/1937)
+2024/07/11 14:43:18 [gnn-update] 30720/31000 (1920/1937)
+2024/07/11 14:43:19 [exec] ... tracking yields graph with 21392 edges (seen 1938 frames)
+2024/07/11 14:43:19 [exec] run filtering
+2024/07/11 14:43:20 [rnn-model] ... 0/1644
+2024/07/11 14:43:20 [rnn-model] ... 1024/1644
+2024/07/11 14:43:21 [exec] ... got 363 good components after filtering
+2024/07/11 14:43:21 [exec] run uncertainty resolution
+2024/07/11 14:43:21 [exec-uncertainty] ... require 0 frames on iter 0
+2024/07/11 14:43:21 [exec] ... got graph with 21392 edges after uncertainty resolution (seen 1938 frames)
+2024/07/11 14:43:21 [exec] run refinement
+2024/07/11 14:43:21 [rnn-model] ... 0/52
+2024/07/11 14:43:21 [exec-refine] ... require 12 frames on iter 0
+2024/07/11 14:43:21 [gnn-update] 4064/31000 (0/24)
+2024/07/11 14:43:23 [rnn-model] ... 0/40
+2024/07/11 14:43:23 [exec-refine] ... require 0 frames on iter 1
+2024/07/11 14:43:23 [exec-refine] ... require 0 frames on iter 0
+2024/07/11 14:43:23 [exec] ... got graph with 21552 edges after refinement (seen 1950 frames)
+2024/07/11 14:43:23 [exec] extracted 1650 tracks
+2024/07/11 14:43:23 [exec] 351/1650 tracks satisfy the predicate
+alpha=0.85:
+137s 
+p=0.9910979228486647, r=0.7822014051522248, f=0.8743455497382199
+alpha=0.8:
+129s 150.19
+p=0.9910714285714286, r=0.7798594847775175, f=0.872870249017038
+alpha=0.7
+141s
+p=0.9910714285714286, r=0.7798594847775175, f=0.872870249017038
+shibuya-crosswalk alpha=0.9:
+p=0.6667 r=1 f=0.8
+处理时长：31分34秒
+alpha=0.8:
+处理时长：142s
+p=0.6666666666666666, r=1, f=0.8
+alpha=0.7:
+处理时长：141s
+p=0.6666666666666666, r=1, f=0.8
+alpha=0.5:
+处理时长：143s
+p=0.6666666666666666, r=1, f=0.8
+uav:
+p=1, r=0.922077922077922, f=0.9594594594594595
+处理时长：464秒
+总视频秒数：6263/16=391.4375秒 (2070+6263*5=33385)
+每秒处理视频秒数：0.8436(4.4969?)
+2024/07/16 14:48:57 [exec] loading train tracks
+2024/07/16 14:48:58 [exec] initializing models
+2024/07/16 14:48:58 [exec] run initial tracking
+2024/07/16 14:48:58 [gnn-update] 0/6263 (0/195)2024/07/16 14:49:03 [gnn] loading detections from data/uav/json/0011-detections.json
+2024/07/16 14:49:03 [gnn] finished loading
+2024/07/16 14:49:10 [gnn-update] 4096/6263 (128/195)
+2024/07/16 14:49:13 [gnn-update] 0/6263 (0/391)
+2024/07/16 14:49:34 [gnn-update] 6144/6263 (384/391)
+2024/07/16 14:49:34 [exec] ... tracking yields graph with 56643 edges (seen 392 frames)
+2024/07/16 14:49:34 [exec] run filtering
+2024/07/16 14:49:34 [filter-nnd] ... 0/2070
+2024/07/16 14:49:34 [filter-nnd] ... 2000/2070
+2024/07/16 14:49:34 [exec] ... got 1 good components after filtering
+2024/07/16 14:49:34 [exec] run uncertainty resolution
+2024/07/16 14:49:35 [exec-uncertainty] ... require 382 frames on iter 0
+2024/07/16 14:49:35 [gnn-update] 16/6263 (0/764)
+2024/07/16 14:50:07 [gnn-update] 5136/6263 (640/764)
+2024/07/16 14:50:14 [exec-uncertainty] ... require 757 frames on iter 1
+2024/07/16 14:50:14 [gnn-update] 16/6263 (0/1514)
+2024/07/16 14:50:46 [gnn-update] 2576/6263 (640/1514)
+2024/07/16 14:50:48 [gnn] {'read': 65.1680896282196, 'run': 35.60132718086243, 'count': 128}
+2024/07/16 14:50:52 [gnn-update] 3088/6263 (768/1514)
+2024/07/16 14:51:23 [gnn-update] 5704/6263 (1408/1514)
+2024/07/16 14:51:28 [exec-uncertainty] ... require 1364 frames on iter 2
+2024/07/16 14:51:28 [gnn-update] 16/6263 (0/2728)
+2024/07/16 14:52:26 [gnn-update] 2524/6263 (1152/2728)
+2024/07/16 14:52:28 [gnn] {'read': 128.37436270713806, 'run': 70.11111903190613, 'count': 256}
+2024/07/16 14:52:31 [gnn-update] 2812/6263 (1280/2728)
+2024/07/16 14:53:38 [gnn-update] 5996/6263 (2688/2728)
+2024/07/16 14:53:40 [exec-uncertainty] ... require 1686 frames on iter 3
+2024/07/16 14:53:40 [gnn-update] 16/6263 (0/3372)
+2024/07/16 14:54:01 [gnn-update] 644/6263 (384/3372)
+2024/07/16 14:54:08 [gnn] {'read': 190.6129720211029, 'run': 105.22114300727844, 'count': 384}
+2024/07/16 14:54:08 [gnn-update] 888/6263 (512/3372)
+2024/07/16 14:55:41 [gnn-update] 4336/6263 (2432/3372)
+2024/07/16 14:55:48 [gnn] {'read': 253.5817108154297, 'run': 140.2509524822235, 'count': 512}
+2024/07/16 14:55:48 [gnn-update] 4584/6263 (2560/3372)
+2024/07/16 14:56:30 [gnn-update] 5952/6263 (3328/3372)
+2024/07/16 14:56:33 [exec-uncertainty] ... require 41 frames on iter 4
+2024/07/16 14:56:33 [gnn-update] 36/6263 (0/82)
+2024/07/16 14:56:38 [exec-uncertainty] ... require 3 frames on iter 5
+2024/07/16 14:56:38 [gnn-update] 1192/6263 (0/6)
+2024/07/16 14:56:39 [exec-uncertainty] ... require 0 frames on iter 6
+2024/07/16 14:56:39 [exec] ... got graph with 61708 edges after uncertainty resolution (seen 4625 frames)
+2024/07/16 14:56:39 [exec] run refinement
+2024/07/16 14:56:39 [exec-refine] ... require 6 frames on iter 0
+2024/07/16 14:56:39 [gnn-update] 0/6263 (0/12)
+2024/07/16 14:56:40 [exec-refine] ... require 1 frames on iter 1
+2024/07/16 14:56:40 [gnn-update] 0/6263 (0/2)
+2024/07/16 14:56:41 [exec-refine] ... require 0 frames on iter 2
+2024/07/16 14:56:41 [exec-refine] ... require 0 frames on iter 0
+2024/07/16 14:56:41 [exec] ... got graph with 61806 edges after refinement (seen 4632 frames)
+2024/07/16 14:56:42 [exec] extracted 3288 tracks
+2024/07/16 14:56:42 [exec] 71/3288 tracks satisfy the predicate
+alpha=0.85:
+512s
+p=0.935064935064935, r=0.935064935064935, f=0.935064935064935
+alpha=0.95:
+552s
+p=0.972972972972973, r=0.935064935064935, f=0.9536423841059603
+warsaw:
+p=0.9986273164035689, r=0.9168241965973535, f=0.9559789750328515
+总视频秒数：1938秒/21912帧？还是31000吧
+处理时长：2829秒
+每秒处理视频数：0.6849
+2024/07/16 16:58:48 [exec] loading train tracks
+2024/07/16 16:58:50 [exec] initializing models
+2024/07/16 16:58:51 [exec] run initial tracking
+2024/07/16 16:58:51 [gnn-update] 0/31000 (0/968)2024/07/16 16:58:56 [gnn] loading detections from data/warsaw/json/2-detections.json
+2024/07/16 16:58:57 [gnn] finished loading
+2024/07/16 16:59:08 [gnn-update] 4096/31000 (128/968)
+2024/07/16 17:00:07 [gnn-update] 28672/31000 (896/968)
+2024/07/16 17:00:13 [gnn-update] 0/31000 (0/1937)
+2024/07/16 17:02:20 [gnn-update] 30720/31000 (1920/1937)
+2024/07/16 17:02:22 [exec] ... tracking yields graph with 236391 edges (seen 1938 frames)
+2024/07/16 17:02:22 [exec] run filtering
+2024/07/16 17:02:23 [filter-nnd] ... 0/6999
+2024/07/16 17:02:27 [filter-nnd] ... 6000/6999
+2024/07/16 17:02:28 [exec] ... got 7 good components after filtering
+2024/07/16 17:02:28 [exec] run uncertainty resolution
+2024/07/16 17:02:29 [exec-uncertainty] ... require 1937 frames on iter 0
+2024/07/16 17:02:29 [gnn-update] 0/31000 (0/3874)
+2024/07/16 17:06:36 [gnn-update] 30720/31000 (3840/3874)
+2024/07/16 17:06:40 [exec-uncertainty] ... require 3873 frames on iter 1
+2024/07/16 17:06:41 [gnn-update] 8/31000 (0/7746)
+2024/07/16 17:06:48 [gnn-update] 520/31000 (128/7746)
+2024/07/16 17:14:45 [gnn-update] 30728/31000 (7680/7746)
+2024/07/16 17:14:50 [exec-uncertainty] ... require 6913 frames on iter 2
+2024/07/16 17:14:52 [gnn-update] 32/31000 (0/13826)
+2024/07/16 17:14:57 [gnn-update] 372/31000 (128/13826)
+2024/07/16 17:30:06 [gnn-update] 30988/31000 (13824/13826)
+2024/07/16 17:30:08 [exec-uncertainty] ... require 7161 frames on iter 3
+2024/07/16 17:30:10 [gnn-update] 50/31000 (0/14322)
+2024/07/16 17:30:18 [gnn-update] 458/31000 (128/14322)
+2024/07/16 17:30:28 [gnn] {'read': 1263.0739738941193, 'run': 577.593430519104, 'count': 1792}
+2024/07/16 17:30:28 [gnn-update] 588/31000 (256/14322)
+2024/07/16 17:45:35 [gnn-update] 30606/31000 (14208/14322)
+2024/07/16 17:45:44 [exec-uncertainty] ... require 75 frames on iter 4
+2024/07/16 17:45:45 [gnn-update] 424/31000 (0/150)
+2024/07/16 17:45:55 [gnn-update] 28068/31000 (128/150)
+2024/07/16 17:45:58 [exec-uncertainty] ... require 6 frames on iter 5
+2024/07/16 17:45:58 [gnn-update] 18560/31000 (0/12)
+2024/07/16 17:46:00 [exec-uncertainty] ... require 3 frames on iter 6
+2024/07/16 17:46:01 [gnn-update] 18560/31000 (0/6)
+2024/07/16 17:46:03 [exec-uncertainty] ... require 1 frames on iter 7
+2024/07/16 17:46:03 [gnn-update] 18564/31000 (0/2)
+2024/07/16 17:46:05 [exec-uncertainty] ... require 2 frames on iter 8
+2024/07/16 17:46:05 [gnn-update] 18564/31000 (0/4)
+2024/07/16 17:46:07 [exec-uncertainty] ... require 1 frames on iter 9
+2024/07/16 17:46:07 [gnn-update] 18568/31000 (0/2)
+2024/07/16 17:46:09 [exec-uncertainty] ... require 2 frames on iter 10
+2024/07/16 17:46:09 [gnn-update] 18568/31000 (0/4)
+2024/07/16 17:46:09 [gnn] {'read': 1860.4263167381287, 'run': 889.7419395446777, 'count': 2688}
+2024/07/16 17:46:11 [exec-uncertainty] ... require 0 frames on iter 11
+2024/07/16 17:46:11 [exec] ... got graph with 366811 edges after uncertainty resolution (seen 21912 frames)
+2024/07/16 17:46:11 [exec] run refinement
+2024/07/16 17:46:13 [rnn-model] ... 0/1271
+2024/07/16 17:46:14 [rnn-model] ... 1024/1271
+2024/07/16 17:46:14 [exec-refine] ... require 0 frames on iter 0
+2024/07/16 17:46:15 [exec-refine] ... require 0 frames on iter 0
+2024/07/16 17:46:16 [exec] ... got graph with 366811 edges after refinement (seen 21912 frames)
+2024/07/16 17:46:18 [exec] extracted 5186 tracks
+2024/07/16 17:46:19 [exec] 1457/5186 tracks satisfy the predicate
+alpha=0.8:
+1378s
+p=0.9992716678805535, r=0.8645242596093258, f=0.927027027027027
+alpha=0.7:
+957s
+p=0.9991850040749797, r=0.7725267800882167, f=0.87135749822317
+alpha=0.6:
+781s
+p=1, r=0.649653434152489, f=0.7876241405653172
+
+fps 10/8 alpha=0.9
+shibuya:
+处理时长：367秒
+每秒处理视频数：31000/8/367=10.56
+p=0.9974160206718347, r=0.9039812646370023, f=0.9484029484029485
+2024/07/26 14:21:47 [exec] loading train tracks
+2024/07/26 14:21:49 [exec] initializing models
+2024/07/26 14:21:50 [exec] run initial tracking
+2024/07/26 14:21:50 [gnn-update] 0/31000 (0/1937)
+2024/07/26 14:21:50 [rnn-model] NOWnownow
+2024/07/26 14:21:50 [rnn-model] Arguments: ['models/rnn/wrapper.py', '1', 'logs/shibuya/8/filter-rnn/model']
+2024/07/26 14:21:50 [rnn-model] logs/shibuya/8/filter-rnn/model
+2024/07/26 14:21:53 [gnn] logs/shibuya/gnn/model
+2024/07/26 14:21:53 [gnn] 123
+2024/07/26 14:21:53 [gnn] data/shibuya/json/2-detections.json
+2024/07/26 14:21:53 [gnn] Checkpoint files exist
+2024/07/26 14:21:53 [gnn] initializing model
+2024/07/26 14:21:55 [gnn] Model restored successfully
+2024/07/26 14:21:55 [gnn] loading detections from data/shibuya/json/2-detections.json
+2024/07/26 14:21:55 [gnn] finished loading
+2024/07/26 14:22:06 [gnn-update] 2048/31000 (128/1937)
+2024/07/26 14:24:12 [gnn-update] 30720/31000 (1920/1937)
+2024/07/26 14:24:13 [gnn-update] 0/31000 (0/3874)
+2024/07/26 14:24:18 [gnn] {'read': 106.84783816337585, 'run': 34.243834018707275, 'count': 128}
+2024/07/26 14:24:21 [gnn-update] 1024/31000 (128/3874)
+2024/07/26 14:26:11 [gnn-update] 16384/31000 (2048/3874)
+2024/07/26 14:26:16 [gnn] {'read': 189.39376378059387, 'run': 67.912180185318, 'count': 256}
+2024/07/26 14:26:18 [gnn-update] 17408/31000 (2176/3874)
+2024/07/26 14:27:52 [gnn-update] 30720/31000 (3840/3874)
+2024/07/26 14:27:54 [exec] ... tracking yields graph with 44387 edges (seen 3875 frames)
+2024/07/26 14:27:54 [exec] run filtering
+2024/07/26 14:27:54 [rnn-model] ... 0/2077
+2024/07/26 14:27:55 [rnn-model] ... 1024/2077
+2024/07/26 14:27:56 [rnn-model] ... 2048/2077
+2024/07/26 14:27:56 [exec] ... got 356 good components after filtering
+2024/07/26 14:27:56 [exec] run uncertainty resolution
+2024/07/26 14:27:56 [exec-uncertainty] ... require 0 frames on iter 0
+2024/07/26 14:27:56 [exec] ... got graph with 44387 edges after uncertainty resolution (seen 3875 frames)
+2024/07/26 14:27:56 [exec] run refinement
+2024/07/26 14:27:56 [rnn-model] ... 0/3
+2024/07/26 14:27:56 [exec-refine] ... require 0 frames on iter 0
+2024/07/26 14:27:56 [exec-refine] ... require 0 frames on iter 0
+2024/07/26 14:27:56 [exec] ... got graph with 44387 edges after refinement (seen 3875 frames)
+2024/07/26 14:27:57 [exec] extracted 2077 tracks
+2024/07/26 14:27:57 [exec] 387/2077 tracks satisfy the predicate
+shibuya-crosswalk
+29'41
+p=0.6666666666666666, r=1, f=0.8
+每秒处理视频数：2.18
+uav
+522s
+每秒处理视频数：1.50
+p=1, r=0.948051948051948, f=0.9733333333333333
+warsaw
+1724s
+每秒处理视频数：2.25
+p=0.9986139986139986, r=0.908002520478891, f=0.9511551155115512
+
+
+
+fps 10/2 alpha=0.9
+shibuya:
+18'26s  1106
+每秒处理视频数：5.6
+p=1, r=0.9180327868852459, f=0.9572649572649572
+shibuya-crosswalk:
+1025s
+每秒处理视频数：6.05
+p=0.8, r=1, f=0.8888888888888888
+uav
+7'20s 440
+每秒处理视频数：2.85
+p=1, r=0.935064935064935, f=0.9664429530201342
+warsaw:
+1334s
+每秒处理视频数：4.65
+p=0.9986291980808774, r=0.9180844360428482, f=0.9566644780039397
+
+
+只用gnn：
+shibuya:
+181s
+p=0.9910714285714286, r=0.7798594847775175, f=0.872870249017038
+shibuya-crosswalk:
+135s
+p=0.6666666666666666, r=1, f=0.8
+uav:
+43s
+p=1, r=0.18181818181818182, f=0.3076923076923077
+warsaw:
+212s
+p=1, r=0.2640201638311279, f=0.41774675972083747
+
+
+
+
+uav-improve:
+f=16 a=0.9
+p=0.9863013698630136, r=0.935064935064935, f=0.9600000000000002
+2025/03/03 11:55:52  912/916
+2025/03/03 11:55:52 [gnn-update] 912/6263 (224/1522)
+2025/03/03 11:57:11  6120/6124
+2025/03/03 11:57:11 [gnn-update] 6120/6263 (1520/1522)
+2025/03/03 11:57:11 [exec-uncertainty] ... require 1397 frames on iter 2
+2025/03/03 11:57:11 准备推理的帧数量: 2794
+2025/03/03 11:57:12  16/18
+2025/03/03 11:57:12 [gnn-update] 16/6263 (0/2794)
+2025/03/03 12:00:07  6068/6070
+2025/03/03 12:00:07 [gnn-update] 6068/6263 (2784/2794)
+2025/03/03 12:00:08 [exec-uncertainty] ... require 1757 frames on iter 3
+2025/03/03 12:00:08 准备推理的帧数量: 3514
+2025/03/03 12:00:08  20/21
+2025/03/03 12:00:08 [gnn-update] 20/6263 (0/3514)
+2025/03/03 12:03:33  6038/6039
+2025/03/03 12:03:33 [gnn-update] 6038/6263 (3504/3514)
+2025/03/03 12:03:34 [exec-uncertainty] ... require 26 frames on iter 4
+2025/03/03 12:03:34 [exec-uncertainty] Skipping detailed update due to low frame requirement
+2025/03/03 12:03:34 [exec] ... got graph with 63254 edges after uncertainty resolution (seen 4689 frames)
+2025/03/03 12:03:34 [exec] run refinement
+Old freqThreshold to: 4
+Adjusted freqThreshold to: 4
+2025/03/03 12:03:34 [exec-refine] ... require 3 frames on iter 0
+2025/03/03 12:03:34  0/8
+2025/03/03 12:03:34 [gnn-update] 0/6263 (0/6)
+2025/03/03 12:03:34 edgeChange = 63326
+2025/03/03 12:03:34 edgeChange > threshold paramAdjustmentFactor = 0.900000
+Old freqThreshold to: 4
+Adjusted freqThreshold to: 3
+2025/03/03 12:03:35 [exec-refine] ... require 1 frames on iter 1
+2025/03/03 12:03:35  0/4
+2025/03/03 12:03:35 [gnn-update] 0/6263 (0/2)
+2025/03/03 12:03:35 edgeChange = 23
+2025/03/03 12:03:35 edgeChange < threshold paramAdjustmentFactor = 0.990000
+Old freqThreshold to: 3
+Adjusted freqThreshold to: 2
+2025/03/03 12:03:35 [exec-refine] ... require 40 frames on iter 2
+2025/03/03 12:03:35  0/2
+2025/03/03 12:03:35 [gnn-update] 0/6263 (0/80)
+2025/03/03 12:03:36  2044/2046
+2025/03/03 12:03:36 [gnn-update] 2044/6263 (16/80)
+2025/03/03 12:03:37  2548/2550
+2025/03/03 12:03:37 [gnn-update] 2548/6263 (32/80)
+2025/03/03 12:03:38  4892/4894
+2025/03/03 12:03:38 [gnn-update] 4892/6263 (48/80)
+2025/03/03 12:03:39  5788/5790
+2025/03/03 12:03:39 [gnn-update] 5788/6263 (64/80)
+2025/03/03 12:03:40 edgeChange = 304
+2025/03/03 12:03:40 edgeChange < threshold paramAdjustmentFactor = 1.089000
+Old freqThreshold to: 2
+Adjusted freqThreshold to: 2
+2025/03/03 12:03:40 [exec-refine] ... require 2 frames on iter 3
+2025/03/03 12:03:40  5504/5506
+2025/03/03 12:03:40 [gnn-update] 5504/6263 (0/4)
+2025/03/03 12:03:40 edgeChange = 16
+2025/03/03 12:03:40 edgeChange < threshold paramAdjustmentFactor = 1.197900
+Old freqThreshold to: 2
+Adjusted freqThreshold to: 2
+2025/03/03 12:03:41 [exec-refine] ... require 0 frames on iter 4
+Old accelThreshold to: 9999.000000
+Adjusted accelThreshold to: 11977.802100
+2025/03/03 12:03:41 [exec-refine] ... require 0 frames on iter 0
+2025/03/03 12:03:41 [exec] ... got graph with 63669 edges after refinement (seen 4735 frames)
+2025/03/03 12:03:42 [exec] extracted 2841 tracks
+2025/03/03 12:03:42 [exec] 73/2841 tracks satisfy the predicate
+482s
+f=16 a=0.85
+p=0.935064935064935, r=0.935064935064935, f=0.935064935064935
+256s
+a=0.95
+p=0.972972972972973, r=0.935064935064935, f=0.9536423841059603
+728s
+shibuya:
+f=16 a=0.9
+p=0.9913793103448276, r=0.8079625292740047, f=0.8903225806451612
+137s
+a=0.85
+p=0.9910979228486647, r=0.7822014051522248, f=0.8743455497382199
+137s
+a=0.8
+p=0.9910714285714286, r=0.7798594847775175, f=0.872870249017038
+142s
+2024/11/15 16:49:40 [exec] initializing models
+2024/11/15 16:49:41 [exec] run initial tracking
+2024/11/15 16:49:41 [gnn-update] 0/31000 (0/968)
+2024/11/15 16:49:43 [gnn] data/shibuya/json/2-detections.json
+2024/11/15 16:49:43 [gnn] Checkpoint files exist
+2024/11/15 16:49:43 [gnn] initializing model
+2024/11/15 16:49:45 [gnn] Model restored successfully
+2024/11/15 16:49:45 [gnn] loading detections from data/shibuya/json/2-detections.json
+2024/11/15 16:49:46 [gnn] finished loading
+2024/11/15 16:49:47 [gnn-update] 512/31000 (16/968)
+2024/11/15 16:49:48 [gnn-update] 1024/31000 (32/968)
+2024/11/15 16:50:30 [gnn-update] 30208/31000 (944/968)
+2024/11/15 16:50:31 [gnn-update] 30720/31000 (960/968)
+2024/11/15 16:50:31 [gnn-update] 0/31000 (0/1937)
+2024/11/15 16:50:32 [gnn-update] 256/31000 (16/1937)
+2024/11/15 16:51:17 [gnn-update] 16640/31000 (1040/1937)
+2024/11/15 16:51:18 [gnn-update] 16896/31000 (1056/1937)
+2024/11/15 16:51:19 [gnn] {'read': 58.74875473976135, 'run': 32.82197070121765, 'count': 128}
+2024/11/15 16:51:19 [gnn-update] 17152/31000 (1072/1937)
+2024/11/15 16:51:54 [gnn-update] 30720/31000 (1920/1937)
+2024/11/15 16:51:55 [gnn-update] 30976/31000 (1936/1937)
+2024/11/15 16:51:55 [exec] ... tracking yields graph with 21405 edges (seen 1938 frames)
+2024/11/15 16:51:55 [exec] run filtering
+2024/11/15 16:51:55 [rnn-model] ... 0/1632
+2024/11/15 16:51:56 [rnn-model] ... 1024/1632
+2024/11/15 16:51:56 [exec] ... got 356 good components after filtering
+2024/11/15 16:51:56 [exec] run uncertainty resolution
+2024/11/15 16:51:56 [exec-uncertainty] ... require 0 frames on iter 0
+2024/11/15 16:51:56 [exec-uncertainty] Skipping detailed update due to low frame requirement
+2024/11/15 16:51:56 [exec] ... got graph with 21405 edges after uncertainty resolution (seen 1938 frames)
+2024/11/15 16:51:56 [exec] run refinement
+Old RNNPSfreqThreshold to: 16
+Adjusted RNNPSfreqThreshold to: 16
+2024/11/15 16:51:56 [rnn-model] ... 0/49
+2024/11/15 16:51:56 [exec-refine] ... require 12 frames on iter 0
+2024/11/15 16:51:56 [gnn-update] 4064/31000 (0/24)
+2024/11/15 16:51:57 [gnn-update] 27888/31000 (16/24)
+2024/11/15 16:51:58 edgeChange = 21564
+2024/11/15 16:51:58 edgeChange > threshold paramAdjustmentFactor = 1.800000
+Old RNNPSfreqThreshold to: 16
+Adjusted RNNPSfreqThreshold to: 16
+2024/11/15 16:51:58 [rnn-model] ... 0/37
+2024/11/15 16:51:58 [exec-refine] ... require 0 frames on iter 1
+Old accelThreshold to: 9999.000000
+Adjusted accelThreshold to: 17998.200000
+2024/11/15 16:51:58 [exec-refine] ... require 0 frames on iter 0
+2024/11/15 16:51:58 [exec] ... got graph with 21564 edges after refinement (seen 1950 frames)
+2024/11/15 16:51:58 [exec] extracted 1640 tracks
+2024/11/15 16:51:58 [exec] 348/1640 tracks satisfy the predicate
+(zpj_tensorflow) 
+shibuya-crosswalk alpha=0.9:
+p=0.6667 r=1 f=0.8
+处理时长：1162秒
+alpha=0.8:
+141s p=0.6666666666666666, r=1, f=0.8
+warsaw
+alpha=0.9 2734s
+p=0.9980276134122288, r=0.9565217391304348, f=0.976833976833977
+alpha=0.8 1368s
+p=0.999271137026239, r=0.8638941398865785, f=0.9266644136532611
+alpha=0.7 1104s
+p=0.9991850040749797, r=0.7725267800882167, f=0.87135749822317
+alpha=0.6 743s
+p=1, r=0.6490233144297417, f=0.7871608712265953
+
+
+f=8 alpha=0.9
+shibuya:306s
+p=0.9974160206718347, r=0.9039812646370023, f=0.9484029484029485
+uav:482s
+p=1, r=0.948051948051948, f=0.9733333333333333
+shibuya-crosswalk:1042s
+p=0.6666666666666666, r=1, f=0.8
+warsaw:1547s
+p=0.9986120749479528, r=0.9067422810333964, f=0.9504623513870541
+f=2 alpha=0.9
+shibuya:1155s
+p=1, r=0.9180327868852459, f=0.9572649572649572
+uav:424s
+p=1, r=0.935064935064935, f=0.9664429530201342
+shibuya-crosswalk:1033s
+p=0.8, r=1, f=0.8888888888888888
+warsaw:1319s
+p=0.9986291980808774, r=0.9180844360428482, f=0.9566644780039397
