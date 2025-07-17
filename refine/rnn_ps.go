@@ -15,6 +15,9 @@ type RNNPSRefiner struct {
 	predFunc  predicate.Predicate
 	model     rnnlib.Model
 	threshold float64
+
+	debugMode  bool
+	notes      string
 }
 
 func MakeRNNPSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner {
@@ -23,6 +26,8 @@ func MakeRNNPSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc predi
 		freq:     freq,
 		predFunc: predFunc,
 		model:    model,
+		debugMode: false,  
+		notes:     "Initialized by MakeRNNPSRefiner",
 	}
 	if cfg["threshold"] != "" {
 		var err error
@@ -31,11 +36,18 @@ func MakeRNNPSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc predi
 			panic(err)
 		}
 	}
+	if r.debugMode {
+		fmt.Println("[DEBUG] RNNPSRefiner created with freq:", r.freq)
+	}
 	return r
 }
 
 func init() {
 	PSRefiners["rnn"] = MakeRNNPSRefiner
+}
+
+func logThreshold(threshold float64, context string) {
+	_ = fmt.Sprintf("Threshold [%s]: %.4f", context, threshold)
 }
 
 func (r *RNNPSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) map[string]string {
@@ -158,17 +170,24 @@ func (r *RNNPSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) map[s
 
 	sort.Float64s(samples)
 	r.threshold = samples[int((1-bound)*float64(len(samples)))]
+	logThreshold(r.threshold, "Plan result")
 	return map[string]string{
 		"threshold": fmt.Sprintf("%v", r.threshold),
 	}
 }
 
 func (r *RNNPSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, []int) {
+	fmt.Printf("[INFO] Step invoked with %d tracks and %d seen frames\n", len(tracks), len(seen))
 	seenSet := make(map[int]bool)
 	for _, frameIdx := range seen {
 		seenSet[frameIdx] = true
 	}
 
+	frameCount := len(seenSet)
+	if r.debugMode {
+		fmt.Printf("[DEBUG] Unique seen frames: %d\n", frameCount)
+	}
+	
 	getFreq := func(frameIdx int) int {
 		for freq := r.freq; freq >= 2; freq /= 2 {
 			if frameIdx%freq == 0 {
@@ -215,6 +234,9 @@ func (r *RNNPSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, []i
 	}
 
 	if len(checkTracks) == 0 {
+		if r.debugMode {
+			fmt.Println("[DEBUG] No tracks to check, skipping inference")
+		}
 		return nil, nil
 	}
 
@@ -246,18 +268,25 @@ func (r *RNNPSRefiner) Close() {
 }
 
 func (r *RNNPSRefiner) AdjustParameters(paramAdjustmentFactor float64) {
-	// 假设这个 threshold 表示当前边缘变化的百分比
-	// 你可以根据这个值调整采样频率等参数
-	fmt.Printf("Old RNNPSfreqThreshold to: %d\n", r.freq)
-	newThreshold := int(float64(r.freq) * paramAdjustmentFactor)
-	// 确保 freqThreshold 不会低于 1，避免不合理值
-	if newThreshold < 1 {
-		newThreshold = 1
-	}
-	if newThreshold > 16 {
-		newThreshold = 16
-	}
-	r.freq = newThreshold
+	fmt.Printf("[INFO] Adjusting parameter with factor: %.2f\n", paramAdjustmentFactor)
 
-	fmt.Printf("Adjusted RNNPSfreqThreshold to: %d\n", r.freq)
+	oldFreq := r.freq
+	newFreq := int(float64(oldFreq) * paramAdjustmentFactor)
+
+	if newFreq < 1 {
+		newFreq = 1
+		fmt.Println("[WARN] Clamped frequency to minimum value 1")
+	}
+	if newFreq > 16 {
+		newFreq = 16
+		fmt.Println("[WARN] Clamped frequency to maximum value 16")
+	}
+
+	if newFreq == oldFreq {
+		fmt.Println("[DEBUG] No adjustment made to frequency.")
+	} else {
+		fmt.Printf("[DEBUG] Frequency changed from %d to %d\n", oldFreq, newFreq)
+	}
+	r.freq = newFreq
 }
+

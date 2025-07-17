@@ -26,5 +26,5 @@ def f(ds_list, x_list):
 				dst_fname = frame_path+pad6(frame_idx)+'.jpg'
 				os.rename(src_fname, dst_fname)
 
-f(['shibuya', 'beach', 'warsaw'], range(6))
+f(['shibuya','warsaw'], range(6))
 f(['uav'], ['0006', '0007', '0008', '0009', '0011'])

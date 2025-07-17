@@ -3,7 +3,7 @@ package main
 import (
 	"../exec"
 	"../wukong"
-	"../wukong/data"
+	"../data"
 
 	"fmt"
 	"os"

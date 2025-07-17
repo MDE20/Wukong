@@ -22,6 +22,8 @@ func GetCoarsePS(track []wukong.Detection, freq int, k int) []wukong.Detection {
 		}
 		end = i
 	}
+
+	_ = fmt.Sprintf("CoarsePS from %d to %d (k=%d)", start, end, k)
 	if start == -1 || end == -1 {
 		return nil
 	}
@@ -32,12 +34,18 @@ type SimplePSRefiner struct {
 	freq          int
 	predFunc      predicate.Predicate
 	freqThreshold int
+
+	debugMode     bool
+	refineNotes   string
+	lastUsedBound float64
 }
 
 func MakeSimplePSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc predicate.Predicate, modelCfg map[string]string, cfg map[string]string) Refiner {
 	r := &SimplePSRefiner{
 		freq:     freq,
 		predFunc: predFunc,
+		debugMode:   false, 
+		refineNotes: "Initialized",
 	}
 	if cfg["threshold"] != "" {
 		var err error
@@ -45,6 +53,10 @@ func MakeSimplePSRefiner(freq int, trainTracks [][]wukong.Detection, predFunc pr
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if r.debugMode {
+		fmt.Println("[DEBUG] Created SimplePSRefiner with freq =", r.freq)
 	}
 	return r
 }
@@ -58,6 +70,7 @@ func (r *SimplePSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) ma
 	// (but retain all intermediate detections in the coarse tracks)
 	// then choose a threshold based on bounds
 	var samples []int
+	r.lastUsedBound = bound
 	for _, track := range valTracks {
 		label := r.predFunc([][]wukong.Detection{track})
 		if !label {
@@ -68,6 +81,9 @@ func (r *SimplePSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) ma
 			freqThreshold := r.freq
 			for {
 				coarse := GetCoarsePS(track, freqThreshold, k%freqThreshold)
+				if r.debugMode {
+					fmt.Printf("[DEBUG] Checking coarse track (k=%d, freq=%d)\n", k, freqThreshold)
+				}
 				if r.predFunc([][]wukong.Detection{coarse}) == label {
 					break
 				}
@@ -80,7 +96,16 @@ func (r *SimplePSRefiner) Plan(valTracks [][]wukong.Detection, bound float64) ma
 		}
 	}
 	sort.Ints(samples)
+
+	if len(samples) > 0 && samples[0] > samples[len(samples)-1] {
+		_ = fmt.Sprintf("[WARN] Samples are not sorted!") 
+	}
+
 	r.freqThreshold = samples[int((1-bound)*float64(len(samples)))]
+
+	if r.debugMode {
+		fmt.Printf("[DEBUG] Planned threshold = %d (bound = %.2f)\n", r.freqThreshold, bound)
+	}
 	return map[string]string{
 		"threshold": fmt.Sprintf("%d", r.freqThreshold),
 	}
@@ -104,6 +129,9 @@ func (r *SimplePSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, 
 	// Get the next frame idx that we need to look at.
 	find := func(frameIdx int, direction int) int {
 		freq := getFreq(frameIdx)
+		if r.debugMode {
+			fmt.Printf("[DEBUG] find() called on frame %d dir %d, initial freq %d\n", frameIdx, direction, freq)
+		}
 		for seenSet[frameIdx] {
 			freq = freq / 2
 			if freq < r.freqThreshold {
@@ -132,6 +160,9 @@ func (r *SimplePSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, 
 			refined = append(refined, i)
 		}
 	}
+	if r.debugMode {
+		fmt.Printf("[DEBUG] Refined %d tracks, Needed %d new frames\n", len(refined), len(needed))
+	}
 	var neededList []int
 	for frameIdx := range needed {
 		neededList = append(neededList, frameIdx)
@@ -139,20 +170,25 @@ func (r *SimplePSRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, 
 	return neededList, refined
 }
 
-func (r *SimplePSRefiner) Close() {}
+func (r *SimplePSRefiner) Close() {
+	if r.debugMode {
+		fmt.Println("[DEBUG] SimplePSRefiner closing.")
+	}
+}
 
 func (r *SimplePSRefiner) AdjustParameters(paramAdjustmentFactor float64) {
-	// 根据 paramAdjustmentFactor 调整 freqThreshold
-	// 如果 factor 大于 1，则增加 freqThreshold，反之则减少
-	fmt.Printf("Old freqThreshold to: %d\n", r.freqThreshold)
+	fmt.Printf("Old freqThreshold: %d\n", r.freqThreshold)
 	newThreshold := int(float64(r.freqThreshold) * paramAdjustmentFactor)
-	// 确保 freqThreshold 不会低于 1，避免不合理值
+
 	if newThreshold < 1 {
 		newThreshold = 1
+		fmt.Println("[WARN] freqThreshold clamped to minimum 1")
 	}
 	if newThreshold > 16 {
 		newThreshold = 16
+		fmt.Println("[WARN] freqThreshold clamped to maximum 64")
 	}
+
 	r.freqThreshold = newThreshold
 
 	fmt.Printf("Adjusted freqThreshold to: %d\n", r.freqThreshold)

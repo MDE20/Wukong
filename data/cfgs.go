@@ -11,8 +11,6 @@ func Get(predName string) (wukong.PreprocessConfig, wukong.ModelConfig) {
 		return Shibuya(predName)
 	} else if predName == "warsaw" || predName == "warsaw-brake" {
 		return Warsaw(predName)
-	} else if predName == "beach-runner" {
-		return Beach(predName)
 	} else if predName == "uav" {
 		return UAV(predName)
 	}
@@ -26,9 +24,6 @@ func GetExec(predName string) (detectionPath string, framePath string) {
 	} else if predName == "warsaw" || predName == "warsaw-brake" {
 		detectionPath = "data/warsaw/json/2-detections.json"
 		framePath = "data/warsaw/frames/2/"
-	} else if predName == "beach-runner" {
-		detectionPath = "data/beach/json/2-detections.json"
-		framePath = "data/beach/frames/2/"
 	} else if predName == "uav" {
 		detectionPath = "data/uav/json/0011-detections.json"
 		framePath = "data/uav/frames/0011/"
@@ -123,44 +118,6 @@ func Warsaw(predName string) (wukong.PreprocessConfig, wukong.ModelConfig) {
 	return ppCfg, modelCfg
 }
 
-func Beach(predName string) (wukong.PreprocessConfig, wukong.ModelConfig) {
-	var segments []wukong.Segment
-	for _, i := range []int{0, 1, 3, 4, 5} {
-		segments = append(segments, wukong.Segment{
-			FramePath: fmt.Sprintf("data/beach/frames/%d/", i),
-			TrackPath: fmt.Sprintf("data/beach/json/%d-baseline.json", i),
-		})
-	}
-
-	ppCfg := wukong.PreprocessConfig{
-		TrainSegments: segments[0:2],
-		ValSegments:   segments[2:],
-		Predicate:     predName,
-		FrameScale:    2,
-	}
-	var modelCfg wukong.ModelConfig
-	for freq := 32; freq >= 1; freq /= 2 {
-		modelCfg.GNN = append(modelCfg.GNN, wukong.GNNModel{
-			Freq:      freq,
-			ModelPath: "logs/beach/gnn/model",
-		})
-		modelCfg.Filters = append(modelCfg.Filters, wukong.FilterModel{
-			Name: "rnn",
-			Freq: freq,
-			Cfg: map[string]string{
-				"model_path": fmt.Sprintf("logs/%s/%d/filter-rnn/model", predName, freq),
-			},
-		})
-		modelCfg.Refiners = append(modelCfg.Refiners, wukong.RefineModel{
-			Name: "rnn",
-			Freq: freq,
-			Cfg: map[string]string{
-				"model_path": fmt.Sprintf("logs/%s/%d/refine-rnn/model", predName, freq),
-			},
-		})
-	}
-	return ppCfg, modelCfg
-}
 
 func UAV(predName string) (wukong.PreprocessConfig, wukong.ModelConfig) {
 	var segments []wukong.Segment

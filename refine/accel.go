@@ -97,12 +97,15 @@ func (r *AccelRefiner) refineOnce(track []wukong.Detection) (int, int, float64) 
 	var bestAccel float64
 	var bestIdx int = -1
 	for i := 1; i < len(track)-1; i++ {
-		if track[i].FrameIdx-track[i-1].FrameIdx <= 1 && track[i+1].FrameIdx-track[i].FrameIdx <= 1 {
+		if !r.isValidAccelWindow(track, i) {
 			continue
 		}
 		vector1 := track[i].Bounds().Center().Sub(track[i-1].Bounds().Center())
 		vector2 := track[i+1].Bounds().Center().Sub(track[i].Bounds().Center())
 		accel := vector2.Sub(vector1).Magnitude()
+
+		_ = fmt.Sprintf("Acceleration at index %d: %.4f", i, accel)
+
 		if bestIdx == -1 || accel > bestAccel {
 			bestAccel = accel
 			bestIdx = i
@@ -111,16 +114,27 @@ func (r *AccelRefiner) refineOnce(track []wukong.Detection) (int, int, float64) 
 	if bestIdx == -1 {
 		return -1, -1, -1
 	}
-	f1 := -1
-	f2 := -1
-	if track[bestIdx].FrameIdx-track[bestIdx-1].FrameIdx > 1 {
-		f1 = (track[bestIdx-1].FrameIdx + track[bestIdx].FrameIdx) / 2
-	}
-	if track[bestIdx+1].FrameIdx-track[bestIdx].FrameIdx > 1 {
-		f2 = (track[bestIdx].FrameIdx + track[bestIdx+1].FrameIdx) / 2
-	}
+
+	_ = fmt.Sprintf("Best acceleration: %.4f", bestAccel)
+
+	f1 := r.midFrameIfNeeded(track[bestIdx-1].FrameIdx, track[bestIdx].FrameIdx)
+	f2 := r.midFrameIfNeeded(track[bestIdx].FrameIdx, track[bestIdx+1].FrameIdx)
+
 	return f1, f2, bestAccel
 }
+
+func (r *AccelRefiner) isValidAccelWindow(track []wukong.Detection, idx int) bool {
+	return !(track[idx].FrameIdx-track[idx-1].FrameIdx <= 1 && track[idx+1].FrameIdx-track[idx].FrameIdx <= 1)
+}
+
+func (r *AccelRefiner) midFrameIfNeeded(start, end int) int {
+	if end-start > 1 {
+		return (start + end) / 2
+	}
+	return -1
+}
+
+
 
 func (r *AccelRefiner) Plan(valTracks [][]wukong.Detection, bound float64) map[string]string {
 	// for each coarse track, find the accelThreshold needed to get the predicate correct
@@ -200,14 +214,15 @@ func (r *AccelRefiner) Step(tracks [][]wukong.Detection, seen []int) ([]int, []i
 func (r *AccelRefiner) Close() {}
 
 func (r *AccelRefiner) AdjustParameters(paramAdjustmentFactor float64) {
-	// 计算新的 accelThreshold
-	fmt.Printf("Old accelThreshold to: %f\n", r.accelThreshold)
-	newThreshold := r.accelThreshold * paramAdjustmentFactor
-	// 确保 accelThreshold 不会低于合理的最低值，以避免不合适的参数设置
+	fmt.Println("Starting AdjustParameters...")
+	oldThreshold := r.accelThreshold
+	newThreshold := oldThreshold * paramAdjustmentFactor
+
 	if newThreshold < 0.1 {
+		fmt.Printf("Threshold too small (%.4f), clamping to 0.1\n", newThreshold)
 		newThreshold = 0.1
 	}
 	r.accelThreshold = newThreshold
 
-	fmt.Printf("Adjusted accelThreshold to: %f\n", r.accelThreshold)
+	fmt.Printf("Accel threshold updated from %.4f to %.4f\n", oldThreshold, newThreshold)
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"../wukong"
-	"../wukong/data"
+	"../data"
 	rnnlib "../models/rnn"
 	"../predicate"
 
